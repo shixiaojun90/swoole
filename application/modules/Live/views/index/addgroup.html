@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>添加群组</title>
+    <link rel="stylesheet" href="/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/public/css/Transfer.css">
+</head>
+<body>
+	<div class="container">
+		<form class="layui-form layui-form-pane" action="">
+			<div class="layui-form-item">
+				<label class="layui-form-label">群名称</label>
+				<div class="layui-input-block">
+					<input name="groupname" autocomplete="off" placeholder="请输入群名称" class="layui-input" type="text" id="groupname"/>
+					<input type="hidden" name="uid" id="userid_arr">
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="ty-transfer mt20 ml20" id="ued-transfer-1">
+    <div class="fl ty-transfer-list transfer-list-left">
+        <div class="ty-transfer-list-head">
+            我的好友列表
+        </div>
+        
+        <div class="ty-transfer-list-body">
+            <ul class="ty-tree-select">
+
+            	<?php foreach($frienddata as $k=>$v){ ?>
+                <li>
+                    <div class="ty-tree-div">
+                        <label class="tyue-checkbox-wrapper">
+                            <span class="tyue-checkbox">
+                                <input type="checkbox" class="tyue-checkbox-input" id="tyue-checkbox-blue">
+                                <span class="tyue-checkbox-circle">
+                                </span>
+                            </span>
+                            <span class="tyue-checkbox-txt" title="<?php echo $v['username'];?>" data-id="<?php echo $v['uid'];?>">
+                               <?php echo $v['username'];?>
+                            </span>
+                        </label>
+                    </div>
+                </li>
+               <?php } ?>
+                
+                
+            </ul>
+        </div>
+        <div class="ty-transfer-list-foot">
+            <div class="ty-tree-div">
+                <div class="tyc-check-blue fl">
+                    <input type="checkbox" class="transfer-all-check" id="tyc-check-blue">
+                    <span>
+                    </span>
+                </div>
+                <div class="ty-tree-text">
+                    全选
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fl ty-transfer-operation">
+        <span class="ty-transfer-btn-toright to-switch">
+        </span>
+        <span class="ty-transfer-btn-toleft to-switch">
+        </span>
+    </div>
+    <div class="fl ty-transfer-list transfer-list-right">
+        <div class="ty-transfer-list-head">
+            群组成员列表
+        </div>
+        <div class="ty-transfer-list-body">
+            <ul class="ty-tree-select">
+                <!-- <li>
+                    <div class="ty-tree-div">
+                        <label class="tyue-checkbox-wrapper">
+                            <span class="tyue-checkbox">
+                                <input type="checkbox" class="tyue-checkbox-input" id="tyue-checkbox-blue">
+                                <span class="tyue-checkbox-circle">
+                                </span>
+                            </span>
+                            <span class="tyue-checkbox-txt" title="穿梭框列表内容 ---- 7">
+                                穿梭框列表内容 ---- 5
+                            </span>
+                        </label>
+                    </div>
+                </li>
+                <li>
+                    <div class="ty-tree-div">
+                        <label class="tyue-checkbox-wrapper">
+                            <span class="tyue-checkbox">
+                                <input type="checkbox" class="tyue-checkbox-input" id="tyue-checkbox-blue">
+                                <span class="tyue-checkbox-circle">
+                                </span>
+                            </span>
+                            <span class="tyue-checkbox-txt" title="穿梭框列表内容 ---- 8">
+                                穿梭框列表内容 ---- 5
+                            </span>
+                        </label>
+                    </div>
+                </li>
+                <li>
+                    <div class="ty-tree-div">
+                        <label class="tyue-checkbox-wrapper">
+                            <span class="tyue-checkbox">
+                                <input type="checkbox" class="tyue-checkbox-input" id="tyue-checkbox-blue">
+                                <span class="tyue-checkbox-circle">
+                                </span>
+                            </span>
+                            <span class="tyue-checkbox-txt" title="穿梭框内容穿梭框内容穿梭框内容 ---- 9">
+                               穿梭框列表内容 ---- 7
+                            </span>
+                        </label>
+                    </div>
+                </li>
+                <li>
+                    <div class="ty-tree-div">
+                        <label class="tyue-checkbox-wrapper">
+                            <span class="tyue-checkbox">
+                                <input type="checkbox" class="tyue-checkbox-input" id="tyue-checkbox-blue">
+                                <span class="tyue-checkbox-circle">
+                                </span>
+                            </span>
+                            <span class="tyue-checkbox-txt" title="穿梭框列表内容穿梭框列表内容 ---- 10">
+                                穿梭框列表内容......
+                            </span>
+                        </label>
+                    </div>
+                </li> -->
+            </ul>
+        </div>
+        <div class="ty-transfer-list-foot">
+            <div class="ty-tree-div">
+                <div class="tyc-check-blue fl">
+                    <input type="checkbox" class="transfer-all-check" id="tyc-check-blue">
+                    <span>
+                    </span>
+                </div>
+                <div class="ty-tree-text">
+                    全选
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="clearboth">
+</div>
+<div style="text-align:center;margin-top:50px;"><button class="layui-btn">提交</button>
+    </div>
+            
+</div>
+<script src="/public/layui/layui.js"></script>
+<script type="text/javascript" src="/public/js/jquery.min.js"></script>
+<script type="text/javascript" src="/public/js/Transfer.js"></script>
+<script type="text/javascript">
+	$("#ued-transfer-1").transferItem();
+	layui.config({
+	base: '/public/js/'
+}).use(['form','jquery','layer','main'],function() {
+var $ 	= layui.jquery,
+	layer = layui.layer,
+	m 	= layui.main;
+$(".layui-btn").click(function(data){
+	var groupname=$.trim($('#groupname').val());
+	if(groupname==''){
+		layer.msg('群名称不能为空!');
+		return false;
+	}
+	var data={name:groupname,uid:''};
+	var arrayObj = new Array();
+	$('.transfer-list-right .tyue-checkbox-txt').each(function(i,v){
+		arrayObj.push($(v).attr('data-id'));
+	})
+	if(arrayObj.length==0){
+		layer.msg('没有添加群成员');
+		return false;
+	}
+	data.uid=arrayObj;
+		 var obj=this;
+		// var uid=$(this).attr('data-id');
+		// console.log(uid);
+		 $.ajax({
+                type	: 'post',
+                url		: '/live/index/addg',
+                data	: data,
+                success	: function(result) {
+                	result=JSON.parse(result);
+                    if(result.data=='success'){
+                    	layer.msg(result.msg);
+                    	var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+						parent.layer.close(index); //再执行关闭  
+						parent.location.reload();
+                    }
+                }
+            });
+	// });
+})
+
+});
+</script>
+
+</body>
+</html>
+</html>

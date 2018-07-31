@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>添加好友</title>
+    <link rel="stylesheet" href="/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/public/css/user.css">
+    <script src="/public/layui/layui.js"></script>
+</head>
+<body>
+	<div class="container">
+		<!-- <div class="content-search">
+			<form class="layui-form layui-form-pane" action="">
+				<div class="layui-inline">
+					<label class="layui-form-label">姓名</label>
+					<div class="layui-input-block">
+						<input name="date" autocomplete="off" class="layui-input" type="text"/>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">手机号码</label>
+					<div class="layui-input-inline">
+						<input name="mobile" autocomplete="off" class="layui-input" type="text"/>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">邮箱</label>
+					<div class="layui-input-inline">
+						<input name="email" autocomplete="off" class="layui-input" type="text"/>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="handle-btn">
+			<button class="layui-btn layui-btn-small" data-url="add.html"><i class="layui-icon">&#xe654;</i>添加</button>
+			<button class="layui-btn layui-btn-small layui-btn-normal" data-url="edit.html"><i class="layui-icon">&#xe642;</i>编辑</button>
+			<button class="layui-btn layui-btn-small layui-btn-danger" data-url="delete.html"><i class="layui-icon">&#xe640;</i> 删除</button>
+		</div> -->
+		<div class="table-list">
+			<table class="layui-table" lay-skin="line">
+				<thead>
+					<tr>
+						<th>用户</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php foreach($frienddata as $k=>$v){ ?>
+					<tr data-assign="<?php echo $k;?>">
+						<td><img src="<?php echo $v['avatar'];?>" style="margin-left: 50px;margin-bottom: 5px;"/><br/><?php echo $v['username'];?></td>
+						<td><button <?php if(!$v['state']){ ?> class="layui-btn" <?php }else{ ?> class="layui-btn layui-btn-disabled"  disabled <?php } ?> data-id="<?php echo $v['uid'];?>" onclick="javascript:var obj=this;var uid=$(this).attr('data-id');$.ajax({type:'post',url:'/live/index/addf',data:{uid:uid},success:function(result){result=JSON.parse(result);if(result.data=='success'){$(obj).attr('disabled',true);$(obj).attr('class','layui-btn-disabled');}}});"><i class="layui-icon">&#xe608;</i> <?php echo $v['statem'];?></button></td>
+					</tr>
+				<?php } ?>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<!-- <div id="table-pages" style="text-align:center"></div> -->
+</body>
+</html>

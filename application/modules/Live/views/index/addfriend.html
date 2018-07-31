@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>添加好友</title>
+    <link rel="stylesheet" href="/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/public/css/user.css">
+</head>
+<body>
+<div class="container">
+<div class="layui-tab">
+  <ul class="layui-tab-title">
+    <li class="layui-this">查找好友</li>
+    <li>查找群组</li>
+  </ul>
+  <div class="layui-tab-content">
+    <div class="layui-tab-item layui-show">
+		<div class="table-list">
+			<table class="layui-table" lay-skin="line">
+				<thead>
+					<tr>
+						<th>用户id</th>
+						<th>用户名</th>
+						<th>用户图像</th>
+						<th>用户注册时间</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php foreach($frienddata as $k=>$v){ ?>
+					<tr data-assign="<?php echo $k;?>">
+						<td><?php echo $v['uid'];?></td>
+						<td><?php echo $v['username'];?></td>
+						<td><img src="<?php echo $v['avatar'];?>" /></td>
+						<td><?php echo $v['create_at'];?></td>
+						<td><button <?php if(!$v['state']){ ?> class="layui-btn" <?php }else{ ?> class="layui-btn layui-btn-disabled"  disabled <?php } ?> data-id='<?php echo json_encode($v);?>' data-type="friend"><i class="layui-icon">&#xe608;</i> <?php echo $v['statem'];?></button></td>
+					</tr>
+				<?php } ?>
+				</tbody>
+			</table>
+		</div>
+    </div>
+    <div class="layui-tab-item">
+		<div class="handle-btn">
+			<button class="layui-btn layui-btn-small" data-url="/live/index/addgroupc"><i class="layui-icon">&#xe654;</i>创建群组</button>
+		</div>
+    	<div class="table-list">
+			<table class="layui-table" lay-skin="line">
+				<thead>
+					<tr>
+						<th>groupid</th>
+						<th>群组名</th>
+						<th>群组图像</th>
+						<th>群组创建时间</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php foreach($groupdata as $k=>$v){ ?>
+					<tr data-assign="<?php echo $k;?>">
+						<td><?php echo $v['groupid'];?></td>
+						<td><?php echo $v['groupname'];?></td>
+						<td><img src="<?php echo $v['avatar'];?>" /></td>
+						<td><?php echo $v['create_at'];?></td>
+						<td><button <?php if(!$v['state']){ ?> class="layui-btn" <?php }else{ ?> class="layui-btn layui-btn-disabled"  disabled <?php } ?> data-id='<?php echo json_encode($v);?>' data-type="group"><i class="layui-icon">&#xe608;</i> <?php echo $v['statem'];?></button></td>
+					</tr>
+				<?php } ?>
+				</tbody>
+			</table>
+			</div>
+		</div>
+  </div>
+</div>
+
+	</div>
+	<!-- <div id="table-pages" style="text-align:center"></div> -->
+	
+	<script src="/public/layui/layui.js"></script>
+    <script type="text/javascript">
+    	var uinfo=JSON.parse('<?php echo $uinfo;?>');
+    	var totalPage = 10;
+    	layui.config({
+	base: '/public/js/'
+}).use(['main','tabletree','laypage','form','jquery','layim','element'],function() {
+	var o 	= layui.jquery,
+		m 	= layui.main,
+		$ = layui.jquery,
+		layim = layui.layim,
+		element = layui.element(),
+		// 列表组
+		l 	= o(".table-list"),
+		// 按钮组
+		b 	= o(".handle-btn"),
+		// 列表搜索组
+		s 	= o(".content-search"),
+		// 树表ID标签
+		tb 	= "#tabletree",
+		// 分页ID标签
+		tp 	= "#table-pages";
+	
+	// 滚动触发事件
+	o(window).scroll(function(){
+		// 按钮组浮动
+		var fh = (s.length ? s.height() : 0) + (b.length ? b.height() : 0);
+		fh && o(window).scrollTop() > fh ? b.addClass("listTopFixed") : b.removeClass("listTopFixed");
+	})
+	
+	// // 选中行
+	// l.on("click","tbody tr",function(){
+	// 	o(this).toggleClass("tableTrSelect").siblings().removeClass("tableTrSelect");
+	// });
+	
+	// 加载表树
+	if(o(tb).length){
+		layui.tabletree({elem: tb})
+	}
+	
+	// 加载分页
+	if(o(tp).length && totalPage){
+		layui.laypage({
+			cont 	: tp.substr(1),
+			pages 	: totalPage,
+			curr	: m.urlDataValue('p') ? m.urlDataValue('p') : 1,
+			skip	: true,
+			jump	: function(obj, first){
+				if(!first){
+					var url = location.href;
+					var isB = url.indexOf('?')>0 ? '&' : '?';
+					location.href =url.indexOf('p=')>0 ? url.replace(/p=\d+/,'p='+obj.curr) : url+isB+'p='+obj.curr;
+				}
+			}
+		});
+	}
+	
+	// 点击按钮
+	b.on("click","button",function(){
+		var t = o(this);
+		var url = t.data("url");
+		if(!url){
+			m.alert("请设置操作链接");
+			return false;
+		}
+		if(t.hasClass("layui-btn-danger") || t.hasClass("layui-btn-normal")){
+			var urlParam = m.selectTrData();
+			if(urlParam.s == 1){
+				m.alert(urlParam.msg);
+				return false;
+			}
+			url = url + (url.indexOf('?') > 0 ? '&': '?') + urlParam.data;
+			if(t.hasClass("layui-btn-danger")){
+				layer.confirm('确认要删除吗？',function(){
+					location.href = url;
+				})
+				return false;
+			}
+		}
+		if(t.hasClass("layui-btn-warm")){
+			// 启动tab页面
+			var id = t.data("menuid") ? t.data("menuid") : new Date().getTime();
+			var mainHeight = o(parent.document).height() - 60 - 41 - 5 - 44;
+			parent.layui.element().tabAdd("top-tab", {
+        		title	: t.html(),
+        		content	: '<iframe src="' + url + '" style="height:' + mainHeight + 'px;"></iframe>',
+        		id		: id
+    		});
+			parent.layui.element().tabChange("top-tab", id);
+			return false;
+		}
+		m.open(url,t.html());
+	});
+	$(".layui-btn").click(function(data){
+		var obj=this;
+		var targetinfo=$(this).attr('data-id');
+		var livetype=$(this).attr('data-type');
+		targetinfo=JSON.parse(targetinfo);
+		switch (livetype)
+              {
+              case 'friend':
+                	layim.add({
+						  type: 'friend'
+						  ,username: targetinfo.username
+						  ,avatar:targetinfo.avatar
+						  ,submit: function(group, remark, index){
+						    	 $.ajax({
+					                type	: 'post',
+					                url		: '/live/index/addf',
+					                data	: {uid:targetinfo.uid,remark:remark},
+					                success	: function(result) {
+					                	result=JSON.parse(result);
+					                    if(result.data=='success'){
+					                    	layer.close(index);
+					                    	$(obj).attr('disabled',true);
+					                    	$(obj).attr('class','layui-btn-disabled');
+					                    }
+					                    parent.layui.layer.msg('申请已发送，请等待对方确认', {
+                                        icon: 1
+                                        ,shade: 0.5
+                                        ,time: 5000
+                                    }, function(){
+                                        layer.close(index);
+                                    });
+					                }
+			            	});
+						  }
+					});
+                break;
+               case 'group':
+                layim.add({
+						  type: 'group'
+						  ,username: targetinfo.username
+						  ,avatar:targetinfo.avatar
+						  ,submit: function(group, remark, index){
+						    	 $.ajax({
+					                type	: 'post',
+					                url		: '/live/index/addgrp',
+					                data	: {uid:uinfo.uid,groupid:targetinfo.groupid,remark:remark},
+					                success	: function(result) {
+					                	result=JSON.parse(result);
+					                    if(result.data=='success'){
+					                    	layer.close(index);
+					                    	$(obj).attr('disabled',true);
+					                    	$(obj).attr('class','layui-btn-disabled');
+					                    }
+					                    parent.layui.layer.msg('申请已发送，请等待群主确认', {
+                                        icon: 1
+                                        ,shade: 0.5
+                                        ,time: 5000
+                                    }, function(){
+                                        //layer.close(index);
+                                    });
+					                }
+			            	});
+						  }
+					});
+                break;
+         	}
+		
+
+
+
+
+	});
+})
+    </script>
+</body>
+</html>

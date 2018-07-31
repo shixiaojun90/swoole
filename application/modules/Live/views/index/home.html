@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>主页</title>
+    <link rel="stylesheet" href="/public/layui/css/layui.css">
+    <style type="text/css">
+    /* tools */
+.flex{
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+.fs-18{
+    font-size: 18px;
+}
+.fs-20{
+    font-size: 20px;
+}
+.bc-eee{
+    background: #e2e2e2;
+}
+.bc-ccc{
+    background: #ccc;
+}
+.bc-black{
+    background: #393D49;
+}
+.bc-white{
+    background: white;
+}
+.color-a6{
+    color: #A6A6A6;
+}
+.color-blue,.color-blue:hover{
+    color: #1E9FFF;
+}
+.color-red,.color-red:hover{
+    color: red;
+}
+.ha{
+    height: 100%;
+}
+.p10{
+    padding: 10px;
+}
+.m10{
+    margin: 10px;
+}
+.wd-130{
+    width: 130px !important;
+}
+.wd-190{
+    width: 190px !important;
+}
+.wd-230{
+    width: 230px !important;
+}
+.wd-240{
+    width: 242px !important;
+}
+.wd-290{
+    width: 290px !important;
+}
+.wd-300{
+    width: 300px !important;
+}
+.wd-500{
+    width: 500px !important;
+}
+.wd-550{
+    width: 550px !important;
+}
+.wd-all{
+    width: auto !important;
+}
+.fr{
+    float: right;
+}
+.fl{
+    float: left;
+}
+.tc{
+    text-align: center;
+}
+.cur{
+    cursor: pointer;
+}
+
+/* layui �桁�頳��� */
+.layui-my-tab{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+.layui-my-tab>.layui-tab-title{
+    text-align: center;
+}
+.layui-my-tab .layui-tab-title li{
+    min-width: inherit;
+    padding: 0;
+    margin: 0 15px;
+}
+.layui-my-tab .layui-tab-title li:hover:after{
+    border-radius: 0;
+    border-bottom: 3px solid #5FB878;
+}
+.layui-my-tab .layui-tab-content{
+    position: absolute;
+    top: 40px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.layui-my-tab .layui-tab-content .layui-tab-item,.layui-my-collapse,.layui-my-collapse .layui-colla-item{
+    height: 100%;
+}
+.layui-my-box .layui-tab-content{
+    position: static;
+}
+.layui-tab .layui-tab, .layui-tab .layui-tab .layui-tab-content{
+    padding: 0;
+    margin: 0;
+}
+.layui-tab .layui-tab .layui-tab-content{
+    padding-top: 10px;
+}
+.layui-my-collapse .layui-colla-item{
+    display: -webkit-box;           /*篏睡��執�х��罔≦��*/
+    -webkit-box-orient: vertical;   /*羂翫抗�����翫��絽�   horizional/vertical*/
+    -moz-box-orient: vertical;
+}
+.layui-my-collapse .layui-colla-item .layui-colla-content{
+    -webkit-box-flex: 1;            /*茹�絎�絖���絖������叱膽�*/
+    -moz-box-flex: 1;
+}
+.layui-my-collapse .layui-colla-title{
+    min-height: 42px;
+    height: 42px;
+    font-weight: bold;
+    padding: 0 10px;
+    background: #eee;
+    cursor: move;
+}
+.layui-my-collapse .layui-colla-content{
+    height: auto;
+    padding: 10px;
+    overflow-y: auto;
+}
+.layui-my-collapse .layui-colla-content .layui-elem-quote,.layui-elem-quote{
+    padding: 10px;
+    background: white;
+    cursor: pointer;
+    border-left-color: transparent;
+    border-radius: 2px;
+}
+.layui-my-collapse .layui-colla-content .layui-elem-quote:hover{
+    transition: 1s;
+    border-left-color: #A6A6A6;
+}
+.layui-my-collapse .layui-colla-content .layui-elem-quote:last-child{
+    margin: 0;
+}
+.layui-my-collapse .layui-colla-content .layui-elem-quote p.layui-my-elip{
+    /*margin-top: 5px;
+    height: 44px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    text-overflow: ellipsis;
+    overflow: hidden;*/
+}
+.layui-my-collapse .layui-colla-content .layui-elem-quote p.bottom-info{
+    margin-top: 5px;
+}
+.layui-my-collapse .layui-colla-content .layui-elem-quote p.bottom-info span button{
+    font-size: 12px;
+    width: 22px;
+    margin: 0;
+    letter-spacing: 10px;
+    overflow: hidden;
+}
+.layui-my-collapse .layui-colla-content .layui-elem-quote p.bottom-info span button:hover{
+    text-align: center;
+    max-width: 90px;
+    width: auto !important;
+    letter-spacing: 0;
+}
+
+.ipt-task .layui-form-checkbox[lay-skin=primary] i,.ipt-task .layui-form-checkbox[lay-skin=primary] i:hover{
+    border: 2px solid #d1d1d1;
+}
+.ipt-task .layui-form-checked i, .ipt-task .layui-form-checked i:hover{
+    background-color: #d1d1d1 !important;
+    border: 2px solid #e2e2e2;
+}
+.layui-btn-eee,.layui-btn-eee:hover{
+    color: grey;
+    background-color: #eee;
+}
+.layui-nav{
+    background: none;
+}
+.layui-layer-tips .layui-layer-content{
+    padding: 10px !important;
+}
+.my-task-box .layui-elem-quote{
+    border-left: 5px solid transparent;
+}
+.my-task-box .layui-elem-quote:hover{
+    transition: .5s;
+    border-left: 5px solid #A6A6A6;
+    background: #EFEFEF;
+}
+.my-task-box .layui-elem-quote span.text-info{
+    margin-left: 5px;
+}
+.my-task-box .color-a6:hover{
+    color: #00a0e9;
+}
+.layui-field-title .layui-form-switch{
+    margin-top: 0;
+    border-radius: 2px;
+}
+
+/* html css */
+html,body{
+    font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft Yahei', 緇�蒐��藥�, STXihei, ����膸�藥�, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    background: transparent;
+}
+.main{
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 10px;
+}
+.main-left{
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    width: 90px;
+    padding: 10px 0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.head-box-li{
+    height: 80px;
+    text-align: center;
+    cursor: pointer;
+}
+.header-user{
+    display: inline-block;
+    border: none;
+    color: white;
+    width: 55px;
+    height: 55px;
+    font-size: 18px;
+    text-align: center;
+    line-height: 55px;
+    border-radius: 55px;
+    background: #FF5722;
+    overflow: hidden;
+}
+.head-box-li p{
+    color: #666;
+}
+.layui-nav-top{
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+.layui-nav-top input,.layui-nav-top button{
+    width: 85%;
+}
+.layui-nav-top input{
+    border-radius: 2px;
+    margin-left: 7.5%;
+    margin-top: 10px;
+}
+.layui-nav-top>div{
+    margin-bottom: 5px;
+}
+.layui-nav-top button:hover,.layui-nav-top button:focus{
+    border: 1px solid #CCC;
+}
+.layui-nav-lb{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: inline-block;
+    width: 100%;
+    background: white;
+}
+.layui-nav-lb .layui-nav-item a{
+    color: #666;
+}
+.layui-nav-lb .layui-nav-item a:hover,.layui-nav-lb .layui-nav-item a:focus,.layui-nav-lb .layui-this>a{
+    color: #666;
+    background: #EFEFEF;
+}
+.layui-nav-lb .layui-nav-bar{
+    background: #A6A6A6;
+}
+.i-tag{
+    position: absolute;
+    top: 13px;
+    right: 3px;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    color: white;
+    line-height: 18px;
+    text-align: center;
+    font-size: 12px;
+    background: #80c9ff;
+}
+.ul-choose{
+    width: 100px;
+    height: auto;
+}
+.ul-choose h1{
+    color: #666;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+}
+.ul-choose>input{
+    margin-bottom: 5px;
+}
+.ul-choose h1 span i,.layui-my-collapse .layui-colla-title span i{
+    cursor: pointer;
+}
+.ul-choose li{
+    color: black;
+    min-height: 33px;
+    line-height: 33px;
+    padding-left: 5px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+.ul-choose li:hover{
+    background-color: #EFEFEF;
+}
+.ul-choose li.nobg:hover{
+    background-color: transparent;
+}
+.ul-choose li.nocur:hover{
+    cursor: auto;
+}
+.ul-choose li i{
+    margin-right: 5px;
+}
+.ul-choose li>a{
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+.ul-choose hr{
+    margin: 5px 0;
+}
+.ul-choose li>div,.ul-choose li>i{
+    display: inline-block;
+}
+.ul-choose li>div p.text-title{
+    height: 25px;
+    line-height: 25px;
+}
+.ul-choose li>div p.text-info{
+    height: 20px;
+    line-height: 20px;
+}
+.ul-add-people{
+    padding: 10px;
+}
+.ul-add-people li{
+    padding: 0;
+    text-align: center;
+    cursor: auto;
+}
+.ul-add-people li:hover{
+    background: transparent;
+}
+.ul-add-people li i{
+    display: inline-block;
+    color: #E2E2E2;
+    font-size: 80px;
+    width: 110px;
+    height: 110px;
+    line-height: 110px;
+    margin: 90px 0;
+}
+.ul-add-people hr{
+    margin: 10px 0;
+}
+.project-menu-list{
+    margin-top: 10px;
+}
+.project-menu-list>hr{
+    margin: 5px 0;
+}
+.ul-project li{
+    /*padding: 0;*/
+}
+.ul-project li>img{
+    display: inline-block;
+    width: 90px;
+    height: 50px;
+}
+
+.main-right{
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 100px;
+    z-index: 100;
+    border-radius: 2px;
+}
+.main-body{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    max-width: 1140px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+.project-index-list{
+    min-height: 150px;
+}
+.project-index-list li{
+    position: relative;
+    display: inline-block;
+    width: 19.7%;
+    min-width: 224px;
+    height: 125px;
+    border-radius: 2px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    vertical-align: top;
+    background-color: #e2e2e2;
+    overflow: hidden;
+    cursor: pointer;
+}
+/*.project-index-list li:hover{
+    top: -2px;
+    left: 0;
+    transition: 1s;
+    box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.15);
+}*/
+.project-index-list li>a,.project-index-list li a img{
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+.project-index-info{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 92%;
+    height: 86%;
+    padding: 4% 4%;
+    overflow: hidden;
+}
+.project-index-info h1{
+    color: white;
+    font-size: 18px;
+}
+.project-index-info p{
+    color: white;
+    font-size: 14px;
+    margin-top: 5px;
+}
+.project-index-tool{
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    display: none;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.project-index-tool>i{
+    font-size: 18px;
+    color: white;
+    font-weight: 600;
+    padding: 5px;
+}
+.project-index-tool>i.project-cancel-star{
+    color: #FFAF38;
+}
+.activation-box{
+    line-height: 110px;
+}
+.project-index-info i.activation{
+    color: white;
+    font-size: 50px;
+    display: none;
+}
+.project-index-list li:hover a div.project-index-info,.project-index-list li:hover div.project-index-tool,.project-index-info:hover i.activation{
+    display: block !important;
+}
+.add-project-box{
+    width: 300px;
+    padding: 10px;
+}
+.add-project-box .project-header{
+    text-align: center;
+    margin: 15px 0 25px 0;
+}
+.add-project-box .project-header i{
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    color: #A6A6A6;
+    line-height: 80px;
+    font-size: 80px;
+}
+.add-project-box .layui-input-inline{
+    width: 100%;
+    margin-right: 0;
+}
+.add-project-box .layui-form-item{
+    margin-bottom: 10px;
+}
+.add-project-box .layui-form-item:last-child{
+    margin-bottom: 0;
+}
+.add-project-box .layui-input-inline input,.add-project-box .layui-input-inline button{
+    width: 100%;
+}
+.add-project-box .layui-btn+.layui-btn{
+    margin: 0;
+}
+
+/* �傑�� */
+.refresh-box{
+    height: auto;
+    margin-bottom: 10px;
+    padding: 10px 0;
+}
+.refresh-box>span{
+    display: inline-block;
+    text-align: center;
+}
+.refresh-box>span>i{
+    display:inline-block;
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+}
+/*content 篁糸�♂�∽��*/
+.sortable{
+    width: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+.sortable,.sortable li.list{
+    height: 100%;
+}
+.sortable li{
+    display: inline-block;
+    width: 290px;
+    margin-right: 10px;
+    vertical-align: top;
+    background: #EEE;
+}
+.sortable li:last-child{
+    margin-right: 0;
+}
+/*��綺������桁�頳���*/
+.sortable-ghost{
+    opacity: 0;
+}
+.ipt-title{
+    display: inline-block;
+    height: 20px;
+    line-height: 20px;
+    padding-left: 6px;
+    vertical-align: middle;
+}
+.add-process-btn,.add-task-btn{
+    color: #666;
+    height: 40px;
+    padding: 0 10px;
+    margin: 10px 0;
+}
+.add-process-btn p,.add-task-btn p{
+    display: inline-block;
+    width: 270px;
+    height: 40px;
+    line-height: 40px;
+    cursor: pointer;
+}
+.add-process-btn p:hover,.add-task-btn p:hover{
+    background: white;
+}
+.add-process-btn i,.add-task-btn i{
+    margin: 0 5px 0 15px;
+}
+/* my */
+.my-main .layui-my-tab{
+    background: white;
+}
+/* notice */
+.notice-main,.my-main{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 10px;
+}
+.notice-left{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 25%;
+    border: 1px solid #EEE;
+    border-radius: 2px;
+    overflow-y: auto;
+}
+.notice-left li.notice-header{
+    height: 50px;
+    padding: 0 10px;
+    border-bottom: 1px solid #E2E2E2;
+}
+.notice-left li.notice-header>div{
+    display: inline-block;
+    height: 50px;
+    line-height: 50px;
+}
+.notice-left li.notice-header>div i,.notice-right h1 i{
+    padding: 5px;
+    cursor: pointer;
+}
+.notice-left li.notice-li-list{
+    cursor: pointer;
+    padding: 16px 48px 20px 16px;
+    border-bottom: 1px solid #EEE;
+}
+.notice-left li.notice-li-list:hover,.notice-left li.notice-li-list.active{
+    background: #F7F7F7;
+}
+.notice-left li section img,.notice-left li section i{
+    display: inline-block;
+    color: #A6A6A6;
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    margin-top: 5px;
+}
+.notice-left li section div.notice-content{
+    color: #A6A6A6;
+    margin-left: 40px;
+    line-height: 22px;
+}
+.notice-right{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 26%;
+    width: 74%;
+    border: 1px solid #EEE;
+    border-radius: 2px;
+}
+.notice-right h1{
+    height: 50px;
+    font-size: 18px;
+    line-height: 50px;
+    padding: 0 10px;
+}
+.notice-right section{
+    margin: 0 10px;
+}
+/* login */
+.login-main{
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 350px;
+    margin: 0 auto;
+}
+.login-main header{
+    margin-top: 10px;
+    height: 35px;
+    line-height: 35px;
+    font-size: 30px;
+    font-weight: 100;
+    text-align: center;
+}
+.login-main form,.login-main form .layui-input-inline,.login-main header{
+    margin-bottom: 15px;
+}
+.login-main form .layui-input-inline,.login-main form .layui-input-inline input,.login-main form .layui-input-inline button{
+    width: 100%;
+}
+.login-main form .login-btn{
+    margin-bottom: 5px;
+}
+/* people-list-ul */
+.people-list-ul li{
+    padding: 5px 0;
+}
+.people-list-ul li .i-img{
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 30px;
+    color: #A6A6A6;
+    margin: 2px 5px;
+}
+.people-list-ul li>div.people-info{
+    color: #A6A6A6;
+    width: 145px;
+    height: 40px;
+    vertical-align: top;
+}
+.people-list-ul li>div.people-info p{
+    height: 20px;
+    line-height: 20px;
+}
+.people-list-ul li>div.people-info p.people-title{
+    font-size: 13px;
+}
+.people-list-ul li>div.people-info p span{
+    display: none;
+}
+.people-list-ul li>div.people-info p span i{
+    display: inline-block;
+    padding: 2px;
+}
+.people-list-ul li:hover>div.people-info p span{
+    display: block;
+}
+</style>
+</head>
+<body>
+
+<div class="login-main">
+    <div>
+        <div style="color:blue;font-weight:bold;font-size:20px;">
+        由于liveim未开源，现在采取捐赠的方式获取授权
+        </div>
+    	<div style="margin-top:10px;">授权说明:liveim是网页即时通讯（WebIM）解决方案，致力于通过灵活、丰富的前端交互，及高度开放的接口，让其自由接入到你的Web系统。目前只能通过捐赠的方式获得全部代码
+        <p style="color:red;font-weight:bold" >授权费用：<b style="font-size:30px;">500RMB</b></p>
+    	<p style="color:red;font-weight:bold">付完款后一定要跟我联系一下，我的qq：904208360，我会把你拉入liveim交流使用付费版（229792939）这个群里讨论交流</p>
+		<p><img src="/public/images/pay.png" style="max-width:100%;height:auto;"></p>
+    	</div>
+    </div>
+</div>
+<script type="text/javascript" src="/public/layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['form','layer'], function () {
+        var form = layui.form(),layer = layui.layer, $ = layui.jquery;
+
+        // 表单提交监听
+        form.on('submit(login)', function(data){
+            // 提交请求
+            $.post("/live/index/login",data.field,function(res){
+                var result=JSON.parse(res);
+                if(result.code==0){
+                    // 提示信息
+                    layer.msg(result.msg,{time:1500},function(){
+                        location.href = "/live/index/index";
+                    });
+                }else{
+                    layer.msg(result.msg,{time:1500});
+                }
+            });
+            return false;
+        });
+
+    });
+</script>
+</body>
+</html>

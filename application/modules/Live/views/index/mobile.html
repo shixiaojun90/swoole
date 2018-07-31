@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>liveim 移动版</title>
+<link rel="stylesheet" href="/public/layui/css/layui.mobile.css">
+<link id="layuicss-skinlayim-mobilecss" rel="stylesheet" href="/public/layui/css/modules/layim/mobile/layim.css" media="all">
+</head>
+<body>
+<link id="layuicss-skinlayercss" rel="stylesheet" href="/public/layui/css/modules/layer/default/layer.css" media="all">
+<script src="/public/layui/layui-mobile.js"></script>
+<script src="/public/js/jquery.min.js"></script>
+<script src="/public/js/pako.min.js"></script>
+<!--<script src="/public/js/jquery.mobile.min.js"></script>-->
+<!-- <img id="avatar-img" src="/public/images/logo.jpg" style="width:160px;height:90px;" /> -->
+<audio id="audio" autoplay="autoplay"></audio>
+<script src="/public/layui/lay/modules/layer.js"></script>
+<script >
+var sinfo='<?php echo $uinfo;?>';
+ var pako = window.pako;
+var livego_result;
+var receiver_socket;
+ var autoname = [
+    'qieangel2013', 
+    '曹超',
+    '林心如',
+    '邓超',
+    '赵丽颖',
+    '奶茶妹',
+    'QQ',
+    '乾坤大罗伊',
+    '张无忌'
+  ];
+  //var LiveName=window.localStorage.getItem("LiveName");
+    //if(LiveName==undefined){
+      //window.location.href='/Live/index/index';
+    //}
+var image = document.getElementById('avatar-img');
+    var audio = document.querySelector('audio');
+        window.initPlayer = function(obj){        
+        obj.playlist = []; //播放列表        
+        obj.position = 0; //当前播放位置
+        //播放音乐(循环播放)
+        obj.start = function(){
+            if(jQuery.isArray(obj.playlist) && obj.playlist.length>=1){
+                $(obj).attr("src", obj.playlist[obj.position % obj.playlist.length]);    
+                obj.play();
+            } 
+        };
+        //播放一个列表
+        obj.playList = function(arr){
+            if(jQuery.isArray(arr) && arr.length>=1){
+                obj.playlist = arr;
+                obj.position = 0;
+                obj.start();  
+            }
+        };
+        //播放下一首
+        $(obj).on("ended",function(e){
+             obj.playlist.shift();
+            //obj.position++;
+            obj.start();           
+        });
+    };
+    initPlayer(audio);
+    function gzip(string) {  
+var charData    = string.split('').map(function(x){return x.charCodeAt(0);});  
+var binData     = new Uint8Array(charData);  
+var data= pako.gzip(binData);  
+var strData= String.fromCharCode.apply(null, new Uint16Array(data));  
+return btoa(strData);  
+}  
+function ungzip(string)  
+{  
+var strData     = atob(string);  
+var charData    = strData.split('').map(function(x){return x.charCodeAt(0);});  
+var binData     = new Uint8Array(charData);  
+var data= pako.ungzip(binData);  
+var strData= String.fromCharCode.apply(null, new Uint16Array(data));  
+return strData;  
+}  
+$.post("getgroup",function(result){
+    livego_result=JSON.parse(result);
+    layui.use(['mobile','layer'], function(){
+  var mobile = layui.mobile
+  ,layim = mobile.layim
+  ,layer = layui.layer;
+var userinfo=JSON.parse(sinfo);
+//   var ltitle_index=layer.open({
+//   type:1,
+//   offset: 't',
+//   area: ['160px', '130px'],
+//   content:$('#avatar-img'),
+//   zIndex: layer.zIndex,
+//   shade: 0,
+//   closeBtn:0,
+//   move:true,
+//   success: function(layero){
+//     layer.setTop(layero);
+//   }
+// });     
+ // layer.title('livego直播群',ltitle_index); 
+  //演示自动回复
+  /*var autoReplay = [
+    '您好，我现在有事不在，一会再和您联系。', 
+    '你没发错吧？face[微笑] ',
+    '洗澡中，请勿打扰，偷窥请购票，个体四十，团体八折，订票电话：一般人我不告诉他！face[哈哈] ',
+    '你好，我是主人的美女秘书，有什么事就跟我说吧，等他回来我会转告他的。face[心] face[心] face[心] ',
+    'face[威武] face[威武] face[威武] face[威武] ',
+    '<（@￣︶￣@）>',
+    '你要和我说话？你真的要和我说话？你确定自己想说吗？你一定非说不可吗？那你说吧，这是自动回复。',
+    'face[黑线]  你慢慢说，别急……',
+    '(*^__^*) face[嘻嘻] ，是贤心吗？'
+  ];*/
+  
+  
+  /*//创建一个会话
+  layim.chat({
+    id: 101
+    ,name: 'livego直播群'
+    ,type: 'group' //friend、group等字符，如果是group，则创建的是群聊
+    ,avatar: '/public/images/logo.jpg'
+  });*/
+  
+   receiver_socket = new WebSocket("ws://"+document.domain+":8080/");
+   //receiver_socket = new WebSocket("wss://"+document.domain+"/chat");
+    receiver_socket.onopen = function (event) {
+    receiver_socket.send(JSON.stringify({Username:userinfo['username'],Data:"亲！我连上啦！",Mtype:"mess",Img:userinfo['avatar'],type:'login',uid:userinfo['uid'],Timestamp:Date.parse(new Date())}));
+  };
+   receiver_socket.onclose = function(event) { 
+    layer.msg('聊天连接已断开，请重新登录！',{icon: 1,shade: 0.5,time:1500},function(){
+                        location.href = "/live/index/login";
+                    });
+  }; 
+  receiver_socket.onmessage = function(data)
+        {
+            zqfdata= JSON.parse(data.data);
+            console.log(zqfdata);
+            if(zqfdata.type=='group'){
+            if(zqfdata.Mtype=='video'){
+                image.src=ungzip(zqfdata.Data);
+            }else if(zqfdata.Mtype=='mess'){
+                if(zqfdata.Data=='亲！我连上啦！'){
+                  /*layim.addList({
+                    type: "group"
+                    ,avatar: zqfdata.Img
+                    ,groupname: "livego直播群"
+                    ,id: "101"
+                    });*/
+                    layim.getMessage({
+                    system: true
+                    ,id: zqfdata.Id
+                    ,type: "group"
+                    ,content: zqfdata.Username + '加入群聊'
+                    });
+                }else{
+                layim.getMessage({
+                username: zqfdata.Username //消息来源用户名
+                ,avatar: zqfdata.Img //消息来源用户头像
+                ,id: zqfdata.Id  //聊天窗口来源ID（如果是私聊，则是用户id，如果是群聊，则是群组id）
+                ,type: "group" //聊天窗口来源类型，从发送消息传递的to里面获取
+                ,content: zqfdata.Data //消息内容
+                //,cid: 0 //消息id，可不传。除非你要对消息进行一些操作（如撤回）
+                ,mine:false //是否我发送的消息，如果为true，则会显示在右方
+                //,fromid: zqfdata.Fromid //消息来源者的id，可用于自动解决浏览器多窗口时的一些问题
+                ,timestamp: zqfdata.Timestamp  //服务端动态时间戳
+                });
+                }
+                //$('#chatLog').append('<br/>'+zqfdata.data);
+                //$('#zystmp').text(zqfdata.Data);
+                //$('#livegotmp').attr('src',zqfdata.Img);
+                //$('#zystmp').trigger('click');
+              }
+            }else if(zqfdata.type=='friend'){
+          layim.getMessage({
+          username: zqfdata.Username //消息来源用户名
+          ,avatar: zqfdata.Img //消息来源用户头像
+          ,id: zqfdata.uid //消息的来源ID（如果是私聊，则是用户id，如果是群聊，则是群组id）
+          ,type: "friend" //聊天窗口来源类型，从发送消息传递的to里面获取
+          ,content: zqfdata.Data //消息内容
+          ,mine: false //是否我发送的消息，如果为true，则会显示在右方
+          //,fromid: zqfdata.Id //消息的发送者id（比如群组中的某个消息发送者），可用于自动解决浏览器多窗口时的一些问题
+          ,timestamp: zqfdata.Timestamp //服务端动态时间戳
+      });
+        }else if(zqfdata.Mtype=='mic'){
+               // var blob=dataURLtoBlob(zqfdata.data);
+                //console.log(zqfdata.data);
+                //console.log(window.URL.createObjectURL(blob));
+                //$('#audio').attr('src',zqfdata.data);
+                //$('#audio').append('<source src="'+zqfdata.Data+'"/>')
+                audio.playlist.push(zqfdata.Data);
+                //audio.src =zqfdata.Data;
+                if(audio.paused){ 
+                    audio.start();
+                } 
+                /*g_audio.elems["id"] = '';
+                g_audio.push({
+                song_id: '',
+                song_fileUrl: window.URL.createObjectURL(zqfdata.data)
+                //audio.src = window.URL.createObjectURL(zqfdata.data);
+            });  */
+        }else if(zqfdata.Mtype=='self'){
+            
+        }else if(zqfdata.type=='system'){
+          switch (zqfdata.status)
+              {
+              case 'online':
+                layim.setFriendStatus(zqfdata.uid,zqfdata.status);
+                break;
+              case 'offline':
+                layim.setFriendStatus(zqfdata.uid,zqfdata.status);
+                break;
+              case 'addfriend':
+                layim.setFriendGroup({
+                        type: 'friend'
+                        ,username: zqfdata.username
+                        ,avatar: zqfdata.avatar
+                        ,group:layim.cache().friend
+                        ,submit: function(group,index){ 
+                            $.post('/live/index/setsta', {
+                                  uid: zqfdata.uid //对方用户ID
+                                  ,type:2
+                                }, function(res){
+                                  res=JSON.parse(res);
+                                  if(res.code != 0){
+                                    return layer.msg(res.msg);
+                                  }
+                                  var data={
+                                    type: 'friend' 
+                                    ,avatar: zqfdata.avatar 
+                                    ,username: zqfdata.username 
+                                    ,groupid: group 
+                                    ,id: zqfdata.uid 
+                                    ,sign: zqfdata.sign
+                                  }
+                                  layim.addList(data);
+                                  layer.close(index);
+                                });
+                        }
+                });
+                break;
+              case 'agreefriend':
+                layer.msg(zqfdata.username+'同意你的好友申请', {
+                                        icon: 1
+                                        ,shade: 0.5
+                                        ,time: 5000
+                                    }, function(){
+                                        //layer.close(index);
+                                    });
+                var data={
+                                    type: 'friend' 
+                                    ,avatar: zqfdata.avatar 
+                                    ,username: zqfdata.username 
+                                    ,groupid:'110' 
+                                    ,id: zqfdata.uid 
+                                    ,sign: zqfdata.sign
+                                  }
+                layim.addList(data);
+                break;
+              case 'refusefriend':
+                layer.msg(zqfdata.username+'拒绝了你的好友申请', {
+                                        icon: 1
+                                        ,shade: 0.5
+                                        ,time: 5000
+                                    }, function(){
+                                        //layer.close(index);
+                                    });
+                break;
+              case 'addgroup':
+                layim.setFriendGroup({
+                        type: 'group'
+                        ,groupname:zqfdata.groupname
+                        ,avatar: zqfdata.avatar
+                        ,group:layim.cache().friend
+                        ,submit: function(group,index){ 
+                            $.post('/live/index/setgrp', {
+                                  uid: zqfdata.uid
+                                  ,groupid:zqfdata.groupid
+                                  ,groupname:zqfdata.groupname
+                                  ,type:2
+                                }, function(res){
+                                  res=JSON.parse(res);
+                                  if(res.code != 0){
+                                    return layer.msg(res.msg);
+                                  }
+                                  var data={
+                                    type: 'group' 
+                                    ,avatar: zqfdata.avatar 
+                                    ,groupname: zqfdata.groupname 
+                                    ,id: zqfdata.groupid
+                                  }
+                                  layim.addList(data);
+                                  layer.close(index);
+                                });
+                        }
+                });
+                break;
+                 case 'agreegroup':
+                layer.msg(zqfdata.username+'同意你的加入群'+zqfdata.groupname+'的申请', {
+                                        icon: 1
+                                        ,shade: 0.5
+                                        ,time: 5000
+                                    }, function(){
+                                        //layer.close(index);
+                                    });
+                var data={
+                                    type: 'group' 
+                                    ,avatar: zqfdata.avatar 
+                                    ,groupname: zqfdata.groupname 
+                                    ,id:zqfdata.groupid
+                                  }
+                layim.addList(data);
+                break;
+              }
+
+        }
+    }
+//配置
+layim.config({
+    init: livego_result.data
+    //上传图片接口
+    ,uploadImage: {
+      url: 'uploadimg' //（返回的数据格式见下文）
+      ,type: '' //默认post
+    } 
+    //上传文件接口
+    ,uploadFile: {
+      url: 'uploadfile' //（返回的数据格式见下文）
+      ,type: '' //默认post
+    }
+    ,isAudio: true //开启聊天工具栏音频
+    ,isVideo: true //开启聊天工具栏视频
+    //,init: livego_result.data
+    ,chatLog: 'viewchat' 
+    //扩展更多列表
+    ,moreList: [{
+      alias: 'find'
+      ,title: '发现'
+      ,iconUnicode: '&#xe628;' //图标字体的unicode，可不填
+      ,iconClass: '' //图标字体的class类名
+    },{
+      alias: 'share'
+      ,title: '分享与邀请'
+      ,iconUnicode: '&#xe641;' //图标字体的unicode，可不填
+      ,iconClass: '' //图标字体的class类名
+    },{
+      alias: 'pay'
+      ,title: '钱包'
+      ,iconUnicode: '&#xe622;' //图标字体的unicode，可不填
+      ,iconClass: '' //图标字体的class类名
+    },{
+      alias: 'set'
+      ,title: '设置'
+      ,iconUnicode: '&#xe614;' //图标字体的unicode，可不填
+      ,iconClass: '' //图标字体的class类名
+    }]
+    
+    //,isNewFriend: false //是否开启“新的朋友”
+    ,isgroup: true //是否开启“群聊”
+    //,chatTitleColor: '#c00' //顶部Bar颜色
+    ,title: 'LiveIM' //应用名，默认：我的IM
+    ,copyright:true
+  });
+  
+//监听点击“新的朋友”
+  layim.on('newFriend', function(){
+    
+    $.get('/live/index/addfriendm',function(result){
+      layim.panel({
+      title: '新的朋友' //标题
+      ,tpl: result //模版
+      ,data: { //数据
+        test: '么么哒'
+      }
+    });
+    })
+    //location.href = '/live/index/addfriend';
+  });
+  
+  //监听点击更多列表
+  layim.on('moreList', function(obj){
+    switch(obj.alias){
+      case 'find':
+        layer.msg('尽请期待');
+        
+        //模拟标记“发现新动态”为已读
+        layim.showNew('More', false);
+        layim.showNew('find', false);
+      break;
+      case 'share':
+        layim.panel({
+          title: '邀请好友' //标题
+          ,tpl: '<div style="padding: 10px;">尽请期待</div>' //模版
+          ,data: { //数据
+            test: '么么哒'
+          }
+        });
+      break;
+      case 'pay':
+        layer.msg('尽请期待');
+        
+        //模拟标记“发现新动态”为已读
+        //layim.showNew('More', false);
+        //layim.showNew('find', false);
+      break;
+      case 'set':
+        layer.msg('尽请期待');
+        
+        //模拟标记“发现新动态”为已读
+        //layim.showNew('More', false);
+        //layim.showNew('find', false);
+      break;
+    }
+  });
+  var logdata;
+//查看聊天信息
+  layim.on('detail', function(data){
+  	$.get('/live/index/chatlogmj?id='+data.id+'&type=group',function(result){
+  	logdata=JSON.parse(result);
+  	$.get('/live/index/chatlogm',function(result){
+    layim.panel({
+      title: data.name + ' 聊天信息' //标题
+      ,tpl: result //模版
+      ,data:logdata.data
+    });
+    })
+  });
+  });
+
+
+ //监听发送消息
+  layim.on('sendMessage', function(data){
+    var To = data.to; 
+    if(To.type === 'friend'){
+      obj = {
+          Username: data.mine.username
+          ,Data: data.mine.content
+          ,Mtype:'mess'
+          ,Img: data.mine.avatar
+          ,Id:To.id
+          ,type: To.type
+          ,uid:userinfo['uid']
+          ,Timestamp:Date.parse(new Date())
+                
+        }
+        receiver_socket.send(JSON.stringify(obj));
+    }
+    if(To.type === 'group'){
+        obj = {
+          Username: data.mine.username
+          ,Data: data.mine.content
+          ,Mtype: 'mess'
+          ,Img: data.mine.avatar
+          ,Id:To.id
+          ,type: To.type
+          ,uid:userinfo['uid']
+          ,Timestamp:Date.parse(new Date())
+                
+        }
+        receiver_socket.send(JSON.stringify(obj));
+      }
+      //演示自动回复
+    /*setTimeout(function(){
+      var obj = {};
+      if(To.type === 'group'){
+        obj = {
+          username: '模拟群员'+(Math.random()*100|0)
+          ,avatar: layui.cache.dir + 'images/face/'+ (Math.random()*72|0) + '.gif'
+          ,id: To.id
+          ,type: To.type
+          ,content: autoReplay[Math.random()*9|0]
+        }
+      } else {
+        obj = {
+          username: To.name
+          ,avatar: To.avatar
+          ,id: To.id
+          ,type: To.type
+          ,content: autoReplay[Math.random()*9|0]
+        }
+        layim.setChatStatus('<span style="color:#FF5722;">在线</span>');
+      }
+      layim.getMessage(obj);
+    }, 1000);*/
+  });
+  setTimeout(function(){
+    layim.getMessage({
+      username: "904208360@qq.com"
+      ,avatar: "/public/images/logo.jpg"
+      ,id: 1
+      ,type: "friend"
+      //,cid: Math.random()*100000|0 //模拟消息id，会赋值在li的data-cid上，以便完成一些消息的操作（如撤回），可不填
+      ,content: "由于liveim未开源，现在采取捐赠的方式获取授权授权说明:liveim是网页即时通讯（WebIM）解决方案，致力于通过灵活、丰富的前端交互，及高度开放的接口，让其自由接入到你的Web系统。目前只能通过捐赠的方式获得全部代码授权费用：400RMB付完款后一定要跟我联系一下，我的qq：904208360，我会把你拉入liveim交流使用付费版（229792939）这个群里讨论交流"
+    });
+    layim.getMessage({
+      username: "904208360@qq.com"
+      ,avatar: "/public/images/logo.jpg"
+      ,id: 1
+      ,type: "friend"
+      //,cid: Math.random()*100000|0 //模拟消息id，会赋值在li的data-cid上，以便完成一些消息的操作（如撤回），可不填
+      ,content: "img[/public/images/pay.png]"
+    });
+  }, 1000);
+
+  //监听查看更多记录
+   layim.on('chatlog', function(data, ul){
+    console.log(data);
+    layim.panel({
+      title: '与 '+ data.username +' 的聊天记录' //标题
+      ,tpl: '<div style="padding: 10px;">这里是模版，{{d.data.test}}</div>' //模版
+      ,data: { //数据
+        test: 'Hello'
+      }
+    });
+  });
+ //模拟"更多"有新动态
+  layim.showNew('More', true);
+  layim.showNew('find', true);
+  layim.showNew('pay', true);
+  layim.showNew('set', true);
+});
+  });
+</script>
+</body>
+</html>

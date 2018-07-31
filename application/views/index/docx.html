@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>liveim开发者文档</title>
+    <link rel="stylesheet" href="/public/layui/css/layui.css">
+    <link rel="stylesheet" href="/public/css/markdown.css">
+    <link rel="stylesheet" href="/public/css/monokai_sublime.min.css">
+    <script src="/public/js/marked.min.js"></script>  
+    <script src="/public/js/highlight.min.js"></script>  
+    <script src="/public/js/jquery-1.8.2.min.js"></script>
+    <script src="/public/layui/layui.js"></script>
+</head>
+<body>
+<ul class="layui-nav" lay-filter="">
+  <li class="layui-nav-item"><a href="/">首页</a></li>
+  <li class="layui-nav-item layui-this"><a href="/index/docx">开发者文档</a></li>
+</ul>
+<div id="content" class="markdown-body">
+</div>
+<script type="text/javascript">
+hljs.initHighlightingOnLoad();
+var renderer = new marked.Renderer();
+$.get("/public/markdown/LiveIm.md", function(response, status, xhr){ 
+		 $("#content").html(marked(response));
+});
+function openkf(){
+   layui.use(['jquery','layim'], function(){
+var layim = layui.layim
+    ,$=layui.jquery;
+$.get('http://www.weivq.com:88/live/index/getkfgroup',function(result){
+    result=JSON.parse(result);
+layim.config({
+    init: {
+      mine: {
+        "username":result.data.mine.username 
+        ,"id": result.data.mine.id
+        ,"status": "online"
+        ,"remark": result.data.mine.sign
+        ,"avatar": result.data.mine.avatar
+      }
+    },
+    brief: true
+  })
+ var receiver_socket = new WebSocket("ws://"+document.domain+":8080/");
+  receiver_socket.onopen = function (event) {
+     receiver_socket.send(JSON.stringify({Username:result.data.mine.username,Data:"kflogin",Mtype:"kf",Img:'',Id:1,type:'friend',uid:result.data.mine.id,Timestamp:Date.parse(new Date())}));
+  };
+   receiver_socket.onclose = function(event) { 
+  }; 
+   receiver_socket.onmessage = function(data)
+        {
+        zqfdata= JSON.parse(data.data);
+        if(zqfdata.type=='friend'){
+            layim.getMessage({
+                username: "客服姐姐"//消息来源用户名
+                ,avatar: zqfdata.Img //消息来源用户头像
+                ,id: zqfdata.uid //消息的来源ID（如果是私聊，则是用户id，如果是群聊，则是群组id）
+                ,type: "friend" //聊天窗口来源类型，从发送消息传递的to里面获取
+                ,content: zqfdata.Data //消息内容
+                ,mine: false //是否我发送的消息，如果为true，则会显示在右方
+                //,fromid: zqfdata.Id //消息的发送者id（比如群组中的某个消息发送者），可用于自动解决浏览器多窗口时的一些问题
+                ,timestamp: zqfdata.Timestamp //服务端动态时间戳
+            });
+        }
+
+    }
+//监听发送消息
+  layim.on('sendMessage', function(data){
+    var To = data.to; 
+    if(To.type === 'friend'){
+      obj = {
+          Username: data.mine.username
+          ,Data: data.mine.content
+          ,Mtype:'kf'
+          ,Img: data.mine.avatar
+          ,Id:1
+          ,type: To.type
+          ,uid:data.mine.id
+          ,Timestamp:Date.parse(new Date())
+                
+        }
+        receiver_socket.send(JSON.stringify(obj));
+    }
+
+});
+   layim.chat({
+    name: '客服姐姐'
+    ,type: 'friend'
+    ,avatar: 'http://www.weivq.com:88//public/images/12.jpg'
+    ,id:1
+  });
+});  
+});
+}
+</script>
+<style>.liveim-kf-box{color:#fff;;z-index:9999;height:99px;text-align:center;border-bottom:1px solid #8dc7ff;cursor:pointer;background-color:#378fe5;width:67px;position:fixed;top: 50%;right:0px;font-size:12px;} .liveim-kf-sp{background:url(/public/images/icon-sprite.png) no-repeat;display: inline-block;zoom: 1;width: 67px;height: 30px;margin-top: 28px;overflow: hidden;background-position: 20px 0px;} </style>
+<div class="liveim-kf-box" onclick="openkf();"> <i class="liveim-kf-sp"></i> <p>客服姐姐</p> </div>
+</body>
+</html>

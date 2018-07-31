@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>LiveIm系统源码 PHP+swoole实现IM+直播系统源码</title>
+    <link rel="stylesheet" href="/public/layui/css/layui.css">
+    <link rel="stylesheet" href="/public/css/livebase.css">
+    <script src="/public/layui/layui.js"></script>
+    <style>
+        html{background-color: #D9D9D9;}
+    </style>
+</head>
+<body>
+<ul class="layui-nav" lay-filter="">
+  <li class="layui-nav-item layui-this"><a href="/">首页</a></li>
+  <li class="layui-nav-item"><a href="/index/docx">开发者文档</a></li>
+</ul>
+<div class="main-box">
+    <div class="desc">
+        <h2>LiveIm</h2>
+	  <p style="color:#555555;font-weight:bold">授权咨询请联系QQ：904208360</p>
+        <p>
+            <a href="http://www.weivq.com:88/live/index/index">网页测试地址</a>
+        </p>
+         <p>windows版本下载
+            <a href="http://www.weivq.com:88/public/uploads/LiveImInstall_x86.exe">(32位下载)LiveImInstall_x86.exe</a>
+        </p>
+         <p>windows版本下载
+            <a href="http://www.weivq.com:88/public/uploads/LiveImInstall_x64.exe">(64位下载)LiveImInstall_x64.exe</a>
+        </p>
+        <br><br>
+		<p>
+            安卓端演示请扫码
+        </p>
+        <img style="width:200px" src="/public/images/android.png">
+        <br><br>
+        <p class="content">
+        移动版演示请扫码<br></p><img style="width:200px" src="/public/images/app.png">
+    </div>
+    <br><br><br><br><br><br>
+
+
+    <div class="site-layim-text">
+        <p>
+            LiveIm是IM的快速部署接入的解决方案，经过简单的编码即可接入自己的系统，程序及数据库全部部署在自己的服务器，源码、数据完全可控。<br>
+            使用LiveIm能够最大限度的减少WebIM的开发周期，大大节约开发成本。LiveIm因为良好的性能及易用性已经被诸多公司采用。
+        </p>
+    </div>
+
+    <div class="auth-title">
+        <fieldset><legend>涵盖功能</legend></fieldset>
+    </div>
+    <div class="site-layim-text">
+        <p>
+            支持群聊、私聊、发表情、发图片、发文件、历史消息、
+            离线消息、消息提醒、在线状态设置、好友分组展示、换肤、
+            好友申请、群组申请、消息盒子、系统消息等功能。
+            兼容除IE6/7以外的所有浏览器。后端PHP＋MySQL。
+            socket服务基于swoole(还有go版本)开发，超高性能，支持多服务器部署。
+            提供go版本和php版本等两个版本源码，以保证快速接入现有系统。
+        </p>
+    </div>
+
+
+
+    <div class="auth-title">
+        <fieldset><legend>获得授权</legend></fieldset>
+    </div>
+
+
+    <div class="site-layim-get">
+		
+	<div class="site-layim-getlist">
+            <p> 授权价格￥600</p>
+            <div class="site-layim-title">
+                <fieldset><legend style="padding: 0 15px;">获得LiveIm源码（android+pc）</legend></fieldset>
+            </div>
+            <ul class="site-layim-text">
+                <li>获得LiveIm所有功能</li>
+                <li>一次授权终生有效，终生免费升级</li>
+                <li>可用于任何企业或个人正规平台</li>
+                <li>提供android、pc所有源码，方便二次开发</li>
+                <li>提供android、pc版本源码</li>
+                <li>专属内部QQ技术群+必要私人支持</li>
+            </ul>
+        </div>
+
+        <div class="site-layim-getlist">
+            <p> 授权价格￥800 </p>
+            <div class="site-layim-title">
+                <fieldset><legend style="padding: 0 15px;">获得LiveIm源码（go）</legend></fieldset>
+            </div>
+            <ul class="site-layim-text">
+                <li>获得LiveIm所有功能</li>
+                <li>一次授权终生有效，终生免费升级</li>
+                <li>可用于任何企业或个人正规平台</li>
+                <li>提供LiveIm所有源码，方便二次开发</li>
+                <li>提供go版本源码</li>
+                <li>专属内部QQ技术群+必要私人支持</li>
+            </ul>
+        </div>
+
+	<div class="site-layim-getlist">
+            <p> 授权价格￥1000 </p>
+            <div class="site-layim-title">
+                <fieldset><legend style="padding: 0 15px;">获得LiveIm源码（go+android+pc）</legend></fieldset>
+            </div>
+            <ul class="site-layim-text">
+                <li>获得LiveIm所有功能</li>
+                <li>一次授权终生有效，终生免费升级</li>
+                <li>可用于任何企业或个人正规平台</li>
+                <li>提供LiveIm所有源码，方便二次开发</li>
+                <li>提供go、android、pc版本源码</li>
+                <li>专属内部QQ技术群+必要私人支持</li>
+            </ul>
+        </div>
+
+        <div class="site-layim-getlist" style="margin-top:20px;">
+            <p> 授权价格￥800 </p>
+            <div class="site-layim-title">
+                <fieldset><legend style="padding: 0 15px;">获得LiveIm源码（php版本）</legend></fieldset>
+            </div>
+            <ul class="site-layim-text">
+                <li>获得<a href="http://www.weivq.com:88/live/index/index">LiveIm</a>所有功能</li>
+                <li>一次授权终生有效，终生免费升级</li>
+                <li>可用于任何企业或个人正规平台</li>
+                <li>提供LiveIm所有源码，方便二次开发</li>
+                <li>专属内部会员QQ技术群，大神云集</li>
+                <li>提供一些必要的私人技术支持</li>
+            </ul>
+        </div>
+
+
+	<div class="site-layim-getlist" style="margin-top:20px;">
+            <p> 授权价格￥1000 </p>
+            <div class="site-layim-title">
+                <fieldset><legend style="padding: 0 15px;">获得LiveIm源码（php+android+pc）</legend></fieldset>
+            </div>
+            <ul class="site-layim-text">
+                <li>获得LiveIm所有功能</li>
+                <li>一次授权终生有效，终生免费升级</li>
+                <li>可用于任何企业或个人正规平台</li>
+                <li>提供LiveIm所有源码，方便二次开发</li>
+                <li>提供php 、android、pc三个版本源码</li>
+                <li>专属内部QQ技术群+必要私人支持</li>
+            </ul>
+        </div>
+
+        <div class="site-layim-getlist" style="margin-top:20px;">
+            <p> 授权价格￥1500 </p>
+            <div class="site-layim-title">
+                <fieldset><legend style="padding: 0 15px;">获得LiveIm源码（php+go+android+pc）</legend></fieldset>
+            </div>
+            <ul class="site-layim-text">
+                <li>获得LiveIm所有功能</li>
+                <li>一次授权终生有效，终生免费升级</li>
+                <li>可用于任何企业或个人正规平台</li>
+                <li>提供LiveIm的php版本和LiveIm的go版本以及安卓版本、pc端桌面版所有源码</li>
+                <li>专属内部会员QQ技术群，大神云集</li>
+                <li>提供一些必要的私人技术支持</li>
+            </ul>
+        </div>
+
+    </div>
+
+
+
+    <div class="auth-title">
+        <fieldset><legend>支付方式</legend></fieldset>
+    </div>
+
+
+    <div class="pay-box">
+         <div class="item">
+            <img src="/public/images/ali.png" style="width:250px;height:250px;">
+        </div>
+        <div class="item">
+            <img src="/public/images/weixin.jpeg" style="width:250px;height:250px;">
+        </div>
+    </div>
+    <blockquote class="layui-elem-quote" style="margin: 10px 0; background-color: #fff;">
+        <p>授权咨询请联系QQ：904208360。选择以上任意方式扫码授权，授权后进入专属LiveIm技术支持群，得到所有源码</p>
+        <p><strong>注意：</strong>您可以将 LiveIm 应用到任意平台，但不可对 LiveIm 本身二次出售。</p>
+    </blockquote>
+
+</div>
+<script type="text/javascript">
+function openkf(){
+   layui.use(['jquery','layim'], function(){
+var layim = layui.layim
+    ,$=layui.jquery;
+$.get('http://www.weivq.com:88/live/index/getkfgroup',function(result){
+    result=JSON.parse(result);
+layim.config({
+    init: {
+      mine: {
+        "username":result.data.mine.username 
+        ,"id": result.data.mine.id
+        ,"status": "online"
+        ,"remark": result.data.mine.sign
+        ,"avatar": result.data.mine.avatar
+      }
+    },
+    brief: true
+  })
+ var receiver_socket = new WebSocket("ws://"+document.domain+":8080/");
+  receiver_socket.onopen = function (event) {
+     receiver_socket.send(JSON.stringify({Username:result.data.mine.username,Data:"kflogin",Mtype:"kf",Img:'',Id:1,type:'friend',uid:result.data.mine.id,Timestamp:Date.parse(new Date())}));
+  };
+   receiver_socket.onclose = function(event) { 
+  }; 
+   receiver_socket.onmessage = function(data)
+        {
+        zqfdata= JSON.parse(data.data);
+        if(zqfdata.type=='friend'){
+            layim.getMessage({
+                username: "客服姐姐"//消息来源用户名
+                ,avatar: zqfdata.Img //消息来源用户头像
+                ,id: zqfdata.uid //消息的来源ID（如果是私聊，则是用户id，如果是群聊，则是群组id）
+                ,type: "friend" //聊天窗口来源类型，从发送消息传递的to里面获取
+                ,content: zqfdata.Data //消息内容
+                ,mine: false //是否我发送的消息，如果为true，则会显示在右方
+                //,fromid: zqfdata.Id //消息的发送者id（比如群组中的某个消息发送者），可用于自动解决浏览器多窗口时的一些问题
+                ,timestamp: zqfdata.Timestamp //服务端动态时间戳
+            });
+        }
+
+    }
+//监听发送消息
+  layim.on('sendMessage', function(data){
+    var To = data.to; 
+    if(To.type === 'friend'){
+      obj = {
+          Username: data.mine.username
+          ,Data: data.mine.content
+          ,Mtype:'kf'
+          ,Img: data.mine.avatar
+          ,Id:1
+          ,type: To.type
+          ,uid:data.mine.id
+          ,Timestamp:Date.parse(new Date())
+                
+        }
+        receiver_socket.send(JSON.stringify(obj));
+    }
+
+});
+   layim.chat({
+    name: '客服姐姐'
+    ,type: 'friend'
+    ,avatar: 'http://www.weivq.com:88//public/images/12.jpg'
+    ,id:1
+  });
+});  
+});
+}
+</script>
+<style>.liveim-kf-box{color:#fff;;z-index:9999;height:99px;text-align:center;border-bottom:1px solid #8dc7ff;cursor:pointer;background-color:#378fe5;width:67px;position:fixed;top: 50%;right:0px;font-size:12px;} .liveim-kf-sp{background:url(/public/images/icon-sprite.png) no-repeat;display: inline-block;zoom: 1;width: 67px;height: 30px;margin-top: 28px;overflow: hidden;background-position: 20px 0px;} </style>
+<div class="liveim-kf-box" onclick="openkf();"> <i class="liveim-kf-sp"></i> <p>客服姐姐</p> </div>
+</body></html>

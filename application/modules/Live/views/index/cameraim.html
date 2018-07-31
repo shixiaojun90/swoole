@@ -1,0 +1,486 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>录像页面</title>
+    <link rel="stylesheet" href="/public/layui/css/layui.css" media="all">
+</head>
+<body>
+    <script src="/public/layui/layui.js"></script>
+    <video autoplay id="sourcevid" style="width:320;height:240px;display:none"></video>
+     <script src="/public/js/jquery.min.js"></script>
+     <script src="/public/js/pako.min.js"></script>
+    <canvas id="output" style="display:none"></canvas>
+    <img id="avatar-img" src="" />
+    <script type="text/javascript" charset="utf-8">
+      var pako = window.pako;
+    	var data;
+        var socket;
+        //ssl配置
+        //var socket = new WebSocket("wss://"+document.domain+":9503");
+        var back = document.getElementById('output');
+        var backcontext = back.getContext('2d');
+        var video = document.getElementsByTagName('video')[0];
+        var image = document.getElementById('avatar-img');
+        //音频
+        var audiostream;
+		var door = false;
+		var gRecorder = null;
+        var SRecorder = function(stream) {
+    config = {};
+ 
+    config.sampleBits = config.smapleBits || 8;
+    config.sampleRate = config.sampleRate || (44100 / 6);
+ 
+    var context = new AudioContext();
+    var audioInput = context.createMediaStreamSource(stream);
+    var recorder = context.createScriptProcessor(4096, 1, 1);
+ 
+    var audioData = {
+        size: 0          //录音文件长度
+        , buffer: []     //录音缓存
+        , inputSampleRate: context.sampleRate    //输入采样率
+        , inputSampleBits: 16       //输入采样数位 8, 16
+        , outputSampleRate: config.sampleRate    //输出采样率
+        , oututSampleBits: config.sampleBits       //输出采样数位 8, 16
+        , clear: function() {
+            this.buffer = [];
+            this.size = 0;
+        }
+        , input: function (data) {
+            this.buffer.push(new Float32Array(data));
+            this.size += data.length;
+        }
+        , compress: function () { //合并压缩
+            //合并
+            var data = new Float32Array(this.size);
+            var offset = 0;
+            for (var i = 0; i < this.buffer.length; i++) {
+                data.set(this.buffer[i], offset);
+                offset += this.buffer[i].length;
+            }
+            //压缩
+            var compression = parseInt(this.inputSampleRate / this.outputSampleRate);
+            var length = data.length / compression;
+            var result = new Float32Array(parseInt(length));
+            var index = 0, j = 0;
+            while (index < length) {
+                result[index] = data[j];
+                j += compression;
+                index++;
+            }
+            return result;
+        }
+        , encodeWAV: function () {
+            var sampleRate = Math.min(this.inputSampleRate, this.outputSampleRate);
+            var sampleBits = Math.min(this.inputSampleBits, this.oututSampleBits);
+            var bytes = this.compress();
+            var dataLength = bytes.length * (sampleBits / 8);
+            var buffer = new ArrayBuffer(44 + dataLength);
+            var data = new DataView(buffer);
+ 
+            var channelCount = 1;//单声道
+            var offset = 0;
+ 
+            var writeString = function (str) {
+                for (var i = 0; i < str.length; i++) {
+                    data.setUint8(offset + i, str.charCodeAt(i));
+                }
+            };
+            
+            // 资源交换文件标识符 
+            writeString('RIFF'); offset += 4;
+            // 下个地址开始到文件尾总字节数,即文件大小-8 
+            data.setUint32(offset, 36 + dataLength, true); offset += 4;
+            // WAV文件标志
+            writeString('WAVE'); offset += 4;
+            // 波形格式标志 
+            writeString('fmt '); offset += 4;
+            // 过滤字节,一般为 0x10 = 16 
+            data.setUint32(offset, 16, true); offset += 4;
+            // 格式类别 (PCM形式采样数据) 
+            data.setUint16(offset, 1, true); offset += 2;
+            // 通道数 
+            data.setUint16(offset, channelCount, true); offset += 2;
+            // 采样率,每秒样本数,表示每个通道的播放速度 
+            data.setUint32(offset, sampleRate, true); offset += 4;
+            // 波形数据传输率 (每秒平均字节数) 单声道×每秒数据位数×每样本数据位/8 
+            data.setUint32(offset, channelCount * sampleRate * (sampleBits / 8), true); offset += 4;
+            // 快数据调整数 采样一次占用字节数 单声道×每样本的数据位数/8 
+            data.setUint16(offset, channelCount * (sampleBits / 8), true); offset += 2;
+            // 每样本数据位数 
+            data.setUint16(offset, sampleBits, true); offset += 2;
+            // 数据标识符 
+            writeString('data'); offset += 4;
+            // 采样数据总数,即数据总大小-44 
+            data.setUint32(offset, dataLength, true); offset += 4;
+            // 写入采样数据 
+            if (sampleBits === 8) {
+                for (var i = 0; i < bytes.length; i++, offset++) {
+                    var s = Math.max(-1, Math.min(1, bytes[i]));
+                    var val = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                    val = parseInt(255 / (65535 / (val + 32768)));
+                    data.setInt8(offset, val, true);
+                }
+            } else {
+                for (var i = 0; i < bytes.length; i++, offset += 2) {
+                    var s = Math.max(-1, Math.min(1, bytes[i]));
+                    data.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                }
+            }
+ 
+            return new Blob([data], { type: 'audio/wav' });
+        }
+    };
+ 
+    this.start = function () {
+        audioInput.connect(recorder);
+        recorder.connect(context.destination);
+    }
+ 
+    this.stop = function () {
+        recorder.disconnect();
+    }
+ 
+    this.getBlob = function () {
+        return audioData.encodeWAV();
+    }
+ 
+    this.clear = function() {
+        audioData.clear();
+    }
+ 
+    recorder.onaudioprocess = function (e) {
+        audioData.input(e.inputBuffer.getChannelData(0));
+    }
+};
+        var success = function(stream){
+            video.src = window.URL.createObjectURL(stream);
+            audiostream = stream;
+            var rec = new SRecorder(stream);
+            gRecorder=rec;
+        }
+
+        var draw = function(){
+            try{
+            	//gRecorder.start();
+            	//door = true;
+                // 按比例压缩4倍
+                // var rate = (back.width<back.height ? back.width/back.height : back.height/back.width)/2;
+                // backcontext.drawImage(video,0,0, back.width, back.height,0,0,back.width*rate,back.height*rate);
+                backcontext.drawImage(video,0,0, back.width, back.height);
+            }catch(e){
+                if (e.name == "NS_ERROR_NOT_AVAILABLE") {
+                    return setTimeout(draw, 100);
+                } else {
+                    throw e;
+                }
+            }
+            if(video.src){
+              var tmpimgdata=gzip(back.toDataURL("image/jpeg", 0.5));
+            	data={Username:'女主播',Data:tmpimgdata,Mtype:"video",Img:'',Fromid:'',Timestamp:Date.parse(new Date())}
+                image.src=back.toDataURL("image/jpeg", 0.5);
+                socket.send(JSON.stringify(data));
+               // data_mic={data:gRecorder.getBlob(),type:'mic'}
+               // socket.send(JSON.stringify(data_mic));
+                //gRecorder.clear();
+                //gRecorder.stop();
+                //door = false;
+            }
+            setTimeout(draw, 100);
+        }
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia || navigator.msGetUserMedia;
+        navigator.getUserMedia({video:true,audio:true}, success, console.log);
+ 	
+ 	var ly_start= function(){
+            try{
+            	//gRecorder.start();
+            	//door = true;
+            if(gRecorder!=null){
+            if(!door) {
+            	
+            		gRecorder.start();
+                	door = true;
+            	
+            }
+        }
+            }catch(e){
+                if (e.name == "NS_ERROR_NOT_AVAILABLE") {
+                    return setTimeout(ly_end, 100);
+                } else {
+                    throw e;
+                }
+            }
+            
+            setTimeout(ly_end, 100);
+        }
+        var ly_end= function(){
+            try{
+            	//gRecorder.start();
+            	//door = true;
+           if(gRecorder!=null){
+            if(door) {
+            	var sd_gRecorder=gRecorder.getBlob();
+            	blobToDataURL(sd_gRecorder, function (dataurl){
+        		data={Username:'女主播',Data:dataurl,Mtype:"mic",Img:'',Fromid:'',Timestamp:Date.parse(new Date())};
+                socket.send(JSON.stringify(data));
+                //console.log(JSON.stringify(gRecorder.getBlob()));
+                //audio.src = window.URL.createObjectURL(gRecorder.getBlob());
+                gRecorder.clear();
+                gRecorder.stop();
+                door = false;
+    			});
+            	
+            }
+        }
+            }catch(e){
+                if (e.name == "NS_ERROR_NOT_AVAILABLE") {
+                    return setTimeout(ly_start, 100);
+                } else {
+                    throw e;
+                }
+            }
+            
+            setTimeout(ly_start, 100);
+        }
+    document.onkeydown = function(e) {
+        if(e.keyCode === 65) {
+            if(!door) {
+                gRecorder.start();
+                door = true;
+            }
+        }
+    };
+ 
+    document.onkeyup = function(e) {
+        if(e.keyCode === 65) {
+            if(door) {
+            	var sd_gRecorder=gRecorder.getBlob();
+            	blobToDataURL(sd_gRecorder, function (dataurl){
+        		data={Username:'女主播',Data:dataurl,Mtype:"mic",Img:'',Fromid:'',Timestamp:Date.parse(new Date())};
+                socket.send(JSON.stringify(data));
+                //console.log(JSON.stringify(gRecorder.getBlob()));
+                //audio.src = window.URL.createObjectURL(gRecorder.getBlob());
+                gRecorder.clear();
+                gRecorder.stop();
+                door = false;
+    			});
+            	
+            }
+        }
+    }
+    function gzip(string) {  
+var charData    = string.split('').map(function(x){return x.charCodeAt(0);});  
+var binData     = new Uint8Array(charData);  
+var data= pako.gzip(binData);  
+var strData= String.fromCharCode.apply(null, new Uint16Array(data));  
+return btoa(strData);  
+}  
+function ungzip(string)  
+{  
+var strData     = atob(string);  
+var charData    = strData.split('').map(function(x){return x.charCodeAt(0);});  
+var binData     = new Uint8Array(charData);  
+var data= pako.ungzip(binData);  
+var strData= String.fromCharCode.apply(null, new Uint16Array(data));  
+return strData;  
+}  
+    function blobToDataURL(blob, callback) {
+        var a = new FileReader();
+        a.onload = function (e) { callback(e.target.result); }
+        a.readAsDataURL(blob);
+    }
+    layui.use(['layer', 'form','upload','layim'], function(){
+  var layer = layui.layer
+  ,form = layui.form()
+  ,upload=layui.upload
+  ,layim = layui.layim;
+var ltitle_index=layer.open({
+  type: 1,
+  offset:['100','200'],
+  area: ['300px', '200px'],
+  content:$('#avatar-img'),
+});    
+layer.title('livego直播群',ltitle_index);
+  //演示自动回复
+  /*var autoReplay = [
+    '您好，我现在有事不在，一会再和您联系。', 
+    '你没发错吧？face[微笑] ',
+    '洗澡中，请勿打扰，偷窥请购票，个体四十，团体八折，订票电话：一般人我不告诉他！face[哈哈] ',
+    '你好，我是主人的美女秘书，有什么事就跟我说吧，等他回来我会转告他的。face[心] face[心] face[心] ',
+    'face[威武] face[威武] face[威武] face[威武] ',
+    '<（@￣︶￣@）>',
+    '你要和我说话？你真的要和我说话？你确定自己想说吗？你一定非说不可吗？那你说吧，这是自动回复。',
+    'face[黑线]  你慢慢说，别急……',
+    '(*^__^*) face[嘻嘻] ，是贤心吗？'
+  ];*/
+  layim.config({
+    //brief: true //是否简约模式（如果true则不显示主面板）
+    init: {
+      url: 'getuser'
+      ,data: {}
+    }
+    ,tool: [{
+      alias: 'code'
+      ,title: '代码'
+      ,icon: '&#xe64e;'
+    }]
+    ,uploadImage: {
+      url: 'uploadimg' //（返回的数据格式见下文）
+      ,type: 'post' //默认post
+    }
+    ,uploadFile: {
+      url: 'uploadfile' //（返回的数据格式见下文）
+      ,type: 'post' //默认post
+    }
+    ,isAudio: true //开启聊天工具栏音频
+    ,isVideo: true //开启聊天工具栏视频
+    ,isfriend: false //是否开启好友（默认true，即开启）
+    ,copyright: true
+    ,chatLog: 'viewchat' 
+  });
+  //创建一个会话
+  layim.chat({
+    id: 101
+    ,name: 'livego直播群'
+    ,type: 'group' //friend、group等字符，如果是group，则创建的是群聊
+    ,avatar: '/public/images/logo.jpg'
+  }); 
+//监听在线状态的切换事件
+  layim.on('online', function(status){
+    layer.msg(status);
+  });
+  
+  //监听签名修改
+  layim.on('sign', function(value){
+    layer.msg(value);
+  });
+  //监听自定义工具栏点击，以添加代码为例
+  layim.on('tool(code)', function(insert){
+    layer.prompt({
+      title: '插入代码'
+      ,formType: 2
+      ,shade: 0
+    }, function(text, index){
+      layer.close(index);
+      insert('[pre class=layui-code]' + text + '[/pre]'); //将内容插入到编辑器
+    });
+  });
+  
+  //监听layim建立就绪
+  layim.on('ready', function(res){
+    //console.log(res.mine);
+    layim.msgbox(5); //模拟消息盒子有新消息，实际使用时，一般是动态获得
+  });
+  socket = new WebSocket("ws://"+document.domain+":8080/");
+  //socket = new WebSocket("wss://"+document.domain+"/chat");
+  socket.onopen = function(){
+             socket.send(JSON.stringify({Username:'女主播',Data:"亲！我连上啦！",Mtype:"mess",Img:'',Fromid:'',Timestamp:Date.parse(new Date())})); 
+            draw();
+            ly_start();
+        }
+  socket.onmessage = function(data)
+        {
+            zqfdata= JSON.parse(data.data);
+            if(zqfdata.Mtype=='mess'){
+                if(zqfdata.Data=='亲！我连上啦！'){
+                    layim.getMessage({
+                    system: true
+                    ,id: "101"
+                    ,type: "group"
+                    ,content: zqfdata.Username + '加入群聊'
+                    });
+                }else{
+                layim.getMessage({
+                username: zqfdata.Username //消息来源用户名
+                ,avatar: zqfdata.Img //消息来源用户头像
+                ,id: "101" //聊天窗口来源ID（如果是私聊，则是用户id，如果是群聊，则是群组id）
+                ,type: "group" //聊天窗口来源类型，从发送消息传递的to里面获取
+                ,content: zqfdata.Data //消息内容
+                //,cid: 0 //消息id，可不传。除非你要对消息进行一些操作（如撤回）
+                ,mine:false //是否我发送的消息，如果为true，则会显示在右方
+                ,fromid: zqfdata.Fromid //消息来源者的id，可用于自动解决浏览器多窗口时的一些问题
+                ,timestamp: zqfdata.Timestamp  //服务端动态时间戳
+                });
+                }
+                //$('#chatLog').append('<br/>'+zqfdata.data);
+                //$('#zystmp').text(zqfdata.Data);
+                //$('#livegotmp').attr('src',zqfdata.Img);
+                //$('#zystmp').trigger('click');
+            }
+    }
+
+
+
+
+  //监听发送消息
+  layim.on('sendMessage', function(data){
+    var To = data.to; 
+    if(To.type === 'friend'){
+      layim.setChatStatus('<span style="color:#FF5722;">对方正在输入。。。</span>');
+    }
+    if(To.type === 'group'){
+         obj = {
+          Username:'女主播'
+          ,Data: data.mine.content
+          ,Mtype: 'mess'
+          ,Img: data.mine.avatar
+          ,Id:'101'
+          ,Fromid: ''
+          ,Timestamp:Date.parse(new Date())
+                
+        }
+        socket.send(JSON.stringify(obj));
+      }
+
+    //演示自动回复
+    /*setTimeout(function(){
+      var obj = {};
+      if(To.type === 'group'){
+        obj = {
+          username: '模拟群员'+(Math.random()*100|0)
+          ,avatar: layui.cache.dir + 'images/face/'+ (Math.random()*72|0) + '.gif'
+          ,id: To.id
+          ,type: To.type
+          ,content: autoReplay[Math.random()*9|0]
+        }
+      } else {
+        obj = {
+          username: To.name
+          ,avatar: To.avatar
+          ,id: To.id
+          ,type: To.type
+          ,content: autoReplay[Math.random()*9|0]
+        }
+        layim.setChatStatus('<span style="color:#FF5722;">在线</span>');
+      }
+      layim.getMessage(obj);
+    }, 1000);*/
+  });
+  
+  //监听聊天窗口的切换
+  /*layim.on('chatChange', function(res){
+    console.log(res)
+    var type = res.data.type;
+    console.log(res.data.id)
+    if(type === 'friend'){
+      //模拟标注好友状态
+      //layim.setChatStatus('<span style="color:#FF5722;">在线</span>');
+    } else if(type === 'group'){
+      //模拟系统消息
+      layim.getMessage({
+        system: true
+        ,id: res.data.id
+        ,type: "group"
+        ,content: '模拟群员'+(Math.random()*100|0) + '加入群聊'
+      });
+    }
+  });*/
+  });
+    </script>
+</body>
+</html>
